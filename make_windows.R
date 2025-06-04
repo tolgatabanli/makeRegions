@@ -6,7 +6,13 @@ suppressMessages(library(readr))
 
 
 # Parse Arguments -----
-upstream <- downstream <- out <- gtf <- bed <- biotype <- feature <- NULL
+
+# required:
+gtf <- bed <- upstream <- downstream <- out <- NULL
+# optional: 
+biotype <- feature <- NULL
+pos_start <- pos_end <- NULL
+
 args <- commandArgs(trailingOnly = TRUE)
 i <- 1
 while (i <= length(args)) {
@@ -27,6 +33,7 @@ while (i <= length(args)) {
     i <- i + 1
   }
 }
+# Required argument check
 if (any(sapply(c("upstream", "downstream", "out"), function(x) is.null(get(x))))) {
   stop("Missing required arguments: --upstream, --downstream, --out")
 }
@@ -93,7 +100,7 @@ input %>%
   
   # remove regions where coordinates go over the edge
       # Alternative could be to mutate to zero if negative...
-  filter(start >= 0 || end >= 0) %>%
+  filter(start >= 0 & end >= 0) %>%
   select(seqnames, start, end, gene_id, score, strand) %>%
   write_tsv(file.path(out), col_names = F)
 
