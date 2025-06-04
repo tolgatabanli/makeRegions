@@ -100,7 +100,11 @@ input %>%
   
   # remove regions where coordinates go over the edge
       # Alternative could be to mutate to zero if negative...
-  filter(start >= 0 & end >= 0) %>%
+  filter({
+    negative_detected <- start < 0 | end < 0
+    if (any(negative_detected, na.rm = TRUE)) message("Negative coordinates filtered out!")
+    !negative_detected
+  }) %>%
   select(seqnames, start, end, gene_id, score, strand) %>%
   write_tsv(file.path(out), col_names = F)
 
