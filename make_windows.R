@@ -8,7 +8,7 @@ suppressMessages(library(readr))
 # Parse Arguments -----
 
 # required:
-gtf <- bed <- upstream <- downstream <- out <- NULL
+gtf <- bed <- upstream <- downstream <- out <- position <- NULL
 # optional: 
 biotype <- feature <- NULL
 pos_start <- pos_end <- NULL
@@ -50,6 +50,12 @@ if (!is.null(gtf) && !is.null(bed)) {
   input <<- import(gtf) %>%
     as.data.frame()
 }
+
+# optional argument check
+if(!is.null(position) && !(position %in% c("start", "end"))) {
+  stop("Position argument should be either 'start' or 'end' !")
+}
+
 # Cast numerical console arguments:
 upstream <- as.numeric(upstream)
 downstream <- as.numeric(downstream)
@@ -85,6 +91,7 @@ using_if_given <- function(df, column_name, value) {
   return(df[[column_name]] == value)
 }
 
+
 # Create the .bed file 
 input %>%
   
@@ -93,13 +100,18 @@ input %>%
   filter(using_if_given(., "gene_biotype", biotype)) %>%
   filter(using_if_given(., "type", feature)) %>%
   
-  # Calculating upstream-downstream windows
+  # if position argument is given, set both coordinates to the given position
+  mutate(start = ifelse(!is.null(position) && position == "end", end, start),
+         end = ifelse(!is.null(position) && position == "start", start, end)) %>%
+  
+  # Calculate upstream-downstream windows
   mutate(start = ifelse(strand == "+", start-1-upstream, start-1-downstream),
-         end = ifelse(strand == "+", end+downstream, end+upstream),
-         score = ifelse(is.na(score), ".", score)) %>%
+         end = ifelse(strand == "+", end+downstream, end+upstream)) %>%
+  
+  # if score not found, fill with dot in .bed annotation
+  mutate(score = ifelse(is.na(score), ".", score)) %>%
   
   # remove regions where coordinates go over the edge
-      # Alternative could be to mutate to zero if negative...
   filter({
     negative_detected <- start < 0 | end < 0
     if (any(negative_detected, na.rm = TRUE)) message("Negative coordinates filtered out!")
