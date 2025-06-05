@@ -17,5 +17,11 @@ echo "---edge case with edge make_windows"
 
 
 # with position
-#echo "---with position"
-#./make_windows.R --gtf data/example_edges.gtf --upstream 1000 --downstream 2000 --out out_tolga/example_gtf_gene_lncRNA_edges.bed --feature gene --biotype lncRNA
+echo "---with position=start"
+./make_windows.R --gtf data/example.gtf --upstream 1000 --downstream 2000 --out out_tolga/example_gtf_gene_lncRNA_position=start.bed --feature gene --biotype lncRNA --position start
+
+# with position
+echo "---with position=end"
+./make_windows.R --gtf data/example.gtf --upstream 1000 --downstream 2000 --out out_tolga/example_gtf_gene_lncRNA_position=end.bed --feature gene --biotype lncRNA --position end
+
+
