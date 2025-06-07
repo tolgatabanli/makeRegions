@@ -2,7 +2,7 @@
 % Please edit documentation in R/make_windows.R
 \name{make_windows}
 \alias{make_windows}
-\title{Create genomic regions with with given upstream and downstream sizes}
+\title{Create genomic regions with upstream-downstream sizes and optional filters}
 \usage{
 make_windows(
   input_file,
@@ -15,6 +15,8 @@ make_windows(
 )
 }
 \arguments{
+\item{input_file}{GTF or BED file}
+
 \item{upstream}{Upstream size}
 
 \item{downstream}{Downstream size}
@@ -27,15 +29,19 @@ make_windows(
 
 \item{position}{(Optional) Specify 'start' or 'end' to build the window around.
 If not specified, the start and end coordinates are extended with upstream and downstream sized in corresponding way.}
-
-\item{input}{GTF or BED file}
 }
 \value{
-Annotated .bed file with windows specified.
+A data.frame of annotated .bed file with specified windows and filter criteria.
+The columns 'seqnames' and 'strand' are factors.
 }
 \description{
-Create genomic regions with with given upstream and downstream sizes
+Create genomic regions with upstream-downstream sizes and optional filters
 }
 \examples{
-TODO
+example_file <- system.file("extdata", "data", "example.gtf", package = "makeregions")
+result <- make_windows(input_file=example_file,
+                       upstream = 1000, downstream = 2000,
+                       feature = "gene", biotype = "lncRNA",
+                       position = "start")$result
+print(head(result))
 }

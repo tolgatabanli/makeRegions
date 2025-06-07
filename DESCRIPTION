@@ -1,9 +1,9 @@
 Package: makeregions
-Title: What the Package Does (One Line, Title Case)
+Title: Utility Tools to Create and Manipulate Genomic Regions
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person("Tolga", "Tabanli", , "tolgatabanli@gmail.com", role = c("aut", "cre"))
+Description: The package "makeregions" currently helps with the creation of genomic regions from GTF or BED files with options to filter specific features.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
@@ -14,5 +14,6 @@ Suggests:
 Imports:
     rtracklayer,
     dplyr,
-    readr
+    readr,
+    magrittr
 Config/testthat/edition: 3

@@ -1,8 +1,8 @@
 utils::globalVariables(c("gtf", "bed", "name", "path_to_out", "start", "end", "strand", "seqnames", "score", "gene_id", "input"))
 
-#' Create genomic regions with with given upstream and downstream sizes
+#' Create genomic regions with upstream-downstream sizes and optional filters
 #'
-#' @param input GTF or BED file
+#' @param input_file GTF or BED file
 #' @param upstream Upstream size
 #' @param downstream Downstream size
 #' @param path_to_output (Optional) File path to write output. Creates dirs if they do not exist
@@ -11,10 +11,17 @@ utils::globalVariables(c("gtf", "bed", "name", "path_to_out", "start", "end", "s
 #' @param position (Optional) Specify 'start' or 'end' to build the window around.
 #' If not specified, the start and end coordinates are extended with upstream and downstream sized in corresponding way.
 #'
-#' @returns Annotated .bed file with windows specified.
+#' @returns A data.frame of annotated .bed file with specified windows and filter criteria.
+#' The columns 'seqnames' and 'strand' are factors.
 #' @export
 #'
-#' @examples TODO
+#' @examples
+#' example_file <- system.file("extdata", "data", "example.gtf", package = "makeregions")
+#' result <- make_windows(input_file=example_file,
+#'                        upstream = 1000, downstream = 2000,
+#'                        feature = "gene", biotype = "lncRNA",
+#'                        position = "start")$result
+#' print(head(result))
 make_windows <- function(input_file, upstream, downstream,
                          path_to_output = NULL,
                          feature = NULL, biotype = NULL, position = NULL) {
@@ -48,6 +55,9 @@ make_windows <- function(input_file, upstream, downstream,
     }
   }
 
+  # Save parameters
+  params <- as.list(environment())
+
   # Create the .bed file
   annotation <- input_file %>%
 
@@ -70,7 +80,9 @@ make_windows <- function(input_file, upstream, downstream,
     # remove regions where coordinates go over the edge
     dplyr::filter({
       negative_detected <- start < 0 | end < 0
-      if (any(negative_detected, na.rm = TRUE)) message("Negative coordinates filtered out!")
+      if (any(negative_detected, na.rm = TRUE)) {
+        message(paste("Negative coordinates filtered out!", sum(negative_detected), "rows eliminated"))
+      }
       !negative_detected
     }) %>%
     dplyr::select(seqnames, start, end, gene_id, score, strand)
@@ -80,7 +92,10 @@ make_windows <- function(input_file, upstream, downstream,
       readr::write_tsv(file.path(path_to_out), col_names = F)
   }
 
-  return(as.data.frame(annotation))
+
+  return(structure(list(result = as.data.frame(annotation),
+                        params = params),
+                   class = "GenomicRegion"))
 }
 
 
