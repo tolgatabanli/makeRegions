@@ -1,4 +1,4 @@
-# Manage amespaces and utility functions
+# Manage namespaces and utility functions
 
 #' @importFrom magrittr %>%
 NULL

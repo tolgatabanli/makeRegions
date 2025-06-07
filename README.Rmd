@@ -12,28 +12,28 @@ knitr::opts_chunk$set(
 library(magrittr)
 ```
 
-# makeregions: Utility Tools to Create and Manipulate Genomic Regions
+# makeRegions: Utility Tools to Create and Manipulate Genomic Regions
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The package "makeregions" currently helps with the creation of genomic regions from GTF or BED files with options to filter specific features.
+The package "makeRegions" currently helps with the creation of genomic regions from GTF or BED files with options to filter specific features.
 
 ## Installation
 
-You can install the development version of makeregions from [GitHub](https://github.com/) with:
+You can install the development version of makeRegions from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("pak")
-pak::pak("tolgatabanli/metagene_windows")
+pak::pak("tolgatabanli/makeRegions")
 ```
 
 ## Example
 
 ```{r example}
-library(makeregions)
+library(makeRegions)
 
-example_file <- system.file("extdata", "data", "example.gtf", package = "makeregions")
+example_file <- system.file("extdata", "data", "example.gtf", package = "makeRegions")
 result <- make_windows(input_file=example_file,
                        upstream = 1000, downstream = 2000,
                        feature = "gene", biotype = "lncRNA",
