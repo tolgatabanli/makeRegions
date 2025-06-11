@@ -63,6 +63,7 @@ make_windows <- function(input_file, upstream, downstream,
 
     # Filter feature (gene, variaton, ...) and biotype (protein_coding, lncRNA, ...)
     # columns are quoted
+    # TODO: convert to flexible optional arguments
     dplyr::filter(using_if_given(., "gene_biotype", biotype)) %>%
     dplyr::filter(using_if_given(., "type", feature)) %>%
 
