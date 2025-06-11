@@ -38,7 +38,7 @@ The columns 'seqnames' and 'strand' are factors.
 Create genomic regions with upstream-downstream sizes and optional filters
 }
 \examples{
-example_file <- system.file("extdata", "data", "example.gtf", package = "makeregions")
+example_file <- system.file("extdata", "data", "example.gtf", package = "makeRegions")
 result <- make_windows(input_file=example_file,
                        upstream = 1000, downstream = 2000,
                        feature = "gene", biotype = "lncRNA",
