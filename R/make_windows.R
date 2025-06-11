@@ -11,12 +11,12 @@ utils::globalVariables(c("gtf", "bed", "name", "path_to_out", "start", "end", "s
 #' @param position (Optional) Specify 'start' or 'end' to build the window around.
 #' If not specified, the start and end coordinates are extended with upstream and downstream sized in corresponding way.
 #'
-#' @returns A data.frame of annotated .bed file with specified windows and filter criteria.
+#' @returns A data.frame in .bed format with specified window and filter criteria.
 #' The columns 'seqnames' and 'strand' are factors.
 #' @export
 #'
 #' @examples
-#' example_file <- system.file("extdata", "data", "example.gtf", package = "makeregions")
+#' example_file <- system.file("extdata", "data", "example.gtf", package = "makeRegions")
 #' result <- make_windows(input_file=example_file,
 #'                        upstream = 1000, downstream = 2000,
 #'                        feature = "gene", biotype = "lncRNA",
