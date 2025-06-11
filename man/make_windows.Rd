@@ -31,7 +31,7 @@ make_windows(
 If not specified, the start and end coordinates are extended with upstream and downstream sized in corresponding way.}
 }
 \value{
-A data.frame of annotated .bed file with specified windows and filter criteria.
+A data.frame in .bed format with specified window and filter criteria.
 The columns 'seqnames' and 'strand' are factors.
 }
 \description{
