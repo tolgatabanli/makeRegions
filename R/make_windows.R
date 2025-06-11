@@ -67,8 +67,8 @@ make_windows <- function(input_file, upstream, downstream,
     dplyr::filter(using_if_given(., "type", feature)) %>%
 
     # if position argument is given, set both coordinates to the given position
-    dplyr::mutate(start = ifelse(!is.null(position) && position == "end", end, start),
-           end = ifelse(!is.null(position) && position == "start", start, end)) %>%
+    dplyr::mutate(start = if (!is.null(position) && position == "end") end else start,
+                  end   = if (!is.null(position) && position == "start") start else end)%>%
 
     # Calculate upstream-downstream windows
     dplyr::mutate(start = ifelse(strand == "+", start-1-upstream, start-1-downstream),
