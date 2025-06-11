@@ -28,7 +28,7 @@ make_windows <- function(input_file, upstream, downstream,
   score <- NA
   # Argument checks
   if (missing(input_file) || missing(upstream) || missing(downstream)) {
-    stop("Missing required arguments: --upstream, --downstream")
+    stop("Missing required arguments: upstream, downstream")
   }
   if(endsWith(input_file, ".gtf")) {
     input_file <- rtracklayer::import(input_file) %>%
