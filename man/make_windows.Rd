@@ -23,11 +23,12 @@ make_windows(
 \item{path_to_output}{(Optional) File path to write output. Creates dirs if they do not exist}
 
 \item{position}{(Optional) Specify 'start' or 'end' to build the window around.
-If not specified, the start and end coordinates are extended with upstream and downstream sized in corresponding way.}
+If not specified, the start and end coordinates are extended with upstream and downstream sizes in corresponding way.}
 
-\item{feature}{(Optional) Filter by given feature such as gene, transcript...}
-
-\item{biotype}{(Optional) Filter by given biotype, if exists in the input GTF, such as lncRNA, pseudogene...}
+\item{...}{(Optional) Arguments to filter. For example, type (gene, transcript)
+gene_biotype (lncRNA, pseudogene)...
+If for any column a vector of length 2 or more is given, the regions will be generated
+that satisfy ANY one of the elements.}
 }
 \value{
 A data.frame in .bed format with specified window and filter criteria.
@@ -40,7 +41,7 @@ Create genomic regions with upstream-downstream sizes and optional filters
 example_file <- system.file("extdata", "data", "example.gtf", package = "makeRegions")
 result <- make_windows(input_file=example_file,
                        upstream = 1000, downstream = 2000,
-                       feature = "gene", biotype = "lncRNA",
-                       position = "start")$result
+                       position = "start",
+                       type = "gene", gene_biotype = "lncRNA")$result
 print(head(result))
 }
