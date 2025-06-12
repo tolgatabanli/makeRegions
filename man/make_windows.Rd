@@ -9,9 +9,8 @@ make_windows(
   upstream,
   downstream,
   path_to_output = NULL,
-  feature = NULL,
-  biotype = NULL,
-  position = NULL
+  position = NULL,
+  ...
 )
 }
 \arguments{
@@ -23,12 +22,12 @@ make_windows(
 
 \item{path_to_output}{(Optional) File path to write output. Creates dirs if they do not exist}
 
+\item{position}{(Optional) Specify 'start' or 'end' to build the window around.
+If not specified, the start and end coordinates are extended with upstream and downstream sized in corresponding way.}
+
 \item{feature}{(Optional) Filter by given feature such as gene, transcript...}
 
 \item{biotype}{(Optional) Filter by given biotype, if exists in the input GTF, such as lncRNA, pseudogene...}
-
-\item{position}{(Optional) Specify 'start' or 'end' to build the window around.
-If not specified, the start and end coordinates are extended with upstream and downstream sized in corresponding way.}
 }
 \value{
 A data.frame in .bed format with specified window and filter criteria.

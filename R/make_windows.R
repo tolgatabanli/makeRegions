@@ -6,10 +6,12 @@ utils::globalVariables(c("gtf", "bed", "name", "path_to_out", "start", "end", "s
 #' @param upstream Upstream size
 #' @param downstream Downstream size
 #' @param path_to_output (Optional) File path to write output. Creates dirs if they do not exist
-#' @param feature (Optional) Filter by given feature such as gene, transcript...
-#' @param biotype (Optional) Filter by given biotype, if exists in the input GTF, such as lncRNA, pseudogene...
 #' @param position (Optional) Specify 'start' or 'end' to build the window around.
-#' If not specified, the start and end coordinates are extended with upstream and downstream sized in corresponding way.
+#' If not specified, the start and end coordinates are extended with upstream and downstream sizes in corresponding way.
+#' @param ... (Optional) Arguments to filter. For example, type (gene, transcript)
+#' gene_biotype (lncRNA, pseudogene)...
+#' If for any column a vector of length 2 or more is given, the regions will be generated
+#' that satisfy ANY one of the elements.
 #'
 #' @returns A data.frame in .bed format with specified window and filter criteria.
 #' The columns 'seqnames' and 'strand' are factors.
@@ -19,13 +21,15 @@ utils::globalVariables(c("gtf", "bed", "name", "path_to_out", "start", "end", "s
 #' example_file <- system.file("extdata", "data", "example.gtf", package = "makeRegions")
 #' result <- make_windows(input_file=example_file,
 #'                        upstream = 1000, downstream = 2000,
-#'                        feature = "gene", biotype = "lncRNA",
-#'                        position = "start")$result
+#'                        position = "start",
+#'                        type = "gene", biotype = "lncRNA")$result
 #' print(head(result))
 make_windows <- function(input_file, upstream, downstream,
-                         path_to_output = NULL,
-                         feature = NULL, biotype = NULL, position = NULL) {
+                         path_to_output = NULL, position = NULL,
+                         ...) {
   score <- NA
+  gtf_filters <- list(...)
+
   # Argument checks
   if (missing(input_file) || missing(upstream) || missing(downstream)) {
     stop("Missing required arguments: upstream, downstream")
@@ -37,6 +41,9 @@ make_windows <- function(input_file, upstream, downstream,
     input_file <- rtracklayer::import(input_file) %>%
       as.data.frame(strings) %>%
       dplyr::rename(gene_id = name)
+    if(length(gtf_filters) == 0) {
+      stop("GTF filters cannot be used with input file of format BED.")
+    }
   } else {
     stop("Provided input file is of wrong format. Should: .gtf or .bed")
   }
@@ -45,6 +52,7 @@ make_windows <- function(input_file, upstream, downstream,
   if(!is.null(position) && !(position %in% c("start", "end"))) {
     stop("Position argument should be either 'start' or 'end' !")
   }
+
   # TODO: Check path_to_out validity
 
   # Create the directory path in out if they don't exist
@@ -61,11 +69,8 @@ make_windows <- function(input_file, upstream, downstream,
   # Create the .bed file
   annotation <- input_file %>%
 
-    # Filter feature (gene, variaton, ...) and biotype (protein_coding, lncRNA, ...)
-    # columns are quoted
-    # TODO: convert to flexible optional arguments
-    dplyr::filter(using_if_given(., "gene_biotype", biotype)) %>%
-    dplyr::filter(using_if_given(., "type", feature)) %>%
+    # filter by gtf arguments (feature and 9th column of gtf)
+    filter_by_gtf(gtf_filters) %>%
 
     # if position argument is given, set both coordinates to the given position
     dplyr::mutate(start = if (!is.null(position) && position == "end") end else start,
@@ -108,9 +113,10 @@ using_if_given <- function(df, column_name, value) {
   # df:           the data frame
   # column_name:  the name of the column as a string (e.g., "biotype")
   # value:        the value to filter on (e.g., "protein_coding")
+  #'              can be a vector!
 
   # Ignore 1: If value not provided
-  if (is.null(value) || is.na(value)) {
+  if (any(is.null(value)) || any(is.na(value))) {
     cat("Argument not given:", deparse(substitute(value)), # backtracking for variable name
         "- continuing without filter.\n")
     return(TRUE)
@@ -124,7 +130,19 @@ using_if_given <- function(df, column_name, value) {
   }
 
   # Success: Perform filter
-  return(df[[column_name]] == value)
+  return(df[[column_name]] %in% value)
+}
+
+# filter by given list of columns
+filter_by_gtf <- function(df, list_of_args) {
+  purrr::reduce(names(list_of_args),           # iterates arguments
+                .init = df,                    # start state
+                .f = function(data, key) {
+                                # for safe filtering and messages
+                  dplyr::filter(data, using_if_given(data,
+                                               key,
+                                               list_of_args[[key]]))
+                })
 }
 
 
