@@ -22,7 +22,7 @@ utils::globalVariables(c("gtf", "bed", "name", "path_to_out", "start", "end", "s
 #' result <- make_windows(input_file=example_file,
 #'                        upstream = 1000, downstream = 2000,
 #'                        position = "start",
-#'                        type = "gene", biotype = "lncRNA")$result
+#'                        type = "gene", gene_biotype = "lncRNA")$result
 #' print(head(result))
 make_windows <- function(input_file, upstream, downstream,
                          path_to_output = NULL, position = NULL,
@@ -39,13 +39,13 @@ make_windows <- function(input_file, upstream, downstream,
       as.data.frame()
   } else if (endsWith(input_file, ".bed")) {
     input_file <- rtracklayer::import(input_file) %>%
-      as.data.frame(strings) %>%
+      as.data.frame() %>%
       dplyr::rename(gene_id = name)
     if(length(gtf_filters) == 0) {
       stop("GTF filters cannot be used with input file of format BED.")
     }
   } else {
-    stop("Provided input file is of wrong format. Should: .gtf or .bed")
+    stop(paste0("Provided input file (", input_file, ") is of wrong format. Should: .gtf or .bed"))
   }
 
   # optional argument check
@@ -57,7 +57,7 @@ make_windows <- function(input_file, upstream, downstream,
 
   # Create the directory path in out if they don't exist
   if (!is.null(path_to_output)) {
-    dir_path <- dirname(path_to_out)
+    dir_path <- dirname(path_to_output)
     if (dir_path != "." && !dir.exists(dir_path)) {
       dir.create(dir_path, recursive = TRUE)
     }
@@ -95,7 +95,8 @@ make_windows <- function(input_file, upstream, downstream,
 
   if(!is.null(path_to_output)) {
     annotation %>%
-      readr::write_tsv(file.path(path_to_out), col_names = F)
+      readr::write_tsv(file.path(path_to_output), col_names = F)
+    message(paste("File has been written:", path_to_output))
   }
 
 
@@ -113,7 +114,7 @@ using_if_given <- function(df, column_name, value) {
   # df:           the data frame
   # column_name:  the name of the column as a string (e.g., "biotype")
   # value:        the value to filter on (e.g., "protein_coding")
-  #'              can be a vector!
+  #               can be a vector!
 
   # Ignore 1: If value not provided
   if (any(is.null(value)) || any(is.na(value))) {
