@@ -14,5 +14,6 @@ Imports:
     rtracklayer,
     dplyr,
     readr,
-    magrittr
+    magrittr,
+    purrr
 Config/testthat/edition: 3
