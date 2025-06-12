@@ -114,10 +114,9 @@ make_windows <- function(input_file, upstream, downstream,
 
 
   # row number for tracking changes and logging
-  nrow_start <- nrow(input_file)
-  nrow_end <- nrow(annotation)
-
-  message(paste("Input had", nrow_start, "rows, output has", nrow_end, "rows."))
+  message(paste("Input had", nrow(input_file),
+                "rows, output has", nrow(annotation), "rows.",
+                "Output has", data.table::uniqueN(annotation), "unique rows."))
 
   if(!is.null(path_to_output)) {
     annotation %>%
