@@ -93,6 +93,12 @@ make_windows <- function(input_file, upstream, downstream,
     }) %>%
     dplyr::select(seqnames, start, end, gene_id, score, strand)
 
+  # row number for tracking changes and logging
+  nrow_start <- nrow(input_file)
+  nrow_end <- nrow(annotation)
+
+  message(paste("Input had", nrow_start, "rows, output has", nrow_end, "rows."))
+
   if(!is.null(path_to_output)) {
     annotation %>%
       readr::write_tsv(file.path(path_to_output), col_names = F)
