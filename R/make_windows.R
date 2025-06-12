@@ -1,4 +1,4 @@
-utils::globalVariables(c("gtf", "bed", "name", "path_to_out", "start", "end", "strand", "seqnames", "score", "gene_id", "input"))
+utils::globalVariables(c("gtf", "bed", "name", "path_to_out", "start", "end", "strand", "seqnames", "score", "gene_id", "input", ":="))
 
 #' Create genomic regions with upstream-downstream sizes and optional filters
 #'
@@ -66,32 +66,52 @@ make_windows <- function(input_file, upstream, downstream,
   # Save parameters
   params <- as.list(environment())
 
-  # Create the .bed file
-  annotation <- input_file %>%
+  #  ========================== Creating BED ==========================
+  annotation <- data.table::as.data.table(input_file)
 
-    # filter by gtf arguments (feature and 9th column of gtf)
-    filter_by_gtf(gtf_filters) %>%
+  # filter by gtf arguments (feature and 9th column of gtf)
+  for (key in names(gtf_filters)) {
+    val <- gtf_filters[[key]]
 
-    # if position argument is given, set both coordinates to the given position
-    dplyr::mutate(start = if (!is.null(position) && position == "end") end else start,
-                  end   = if (!is.null(position) && position == "start") start else end)%>%
+    if (is.null(val) || all(is.na(val))) {
+      message("Argument not given for ", key, " — skipping filter.")
+      next
+    }
 
-    # Calculate upstream-downstream windows
-    dplyr::mutate(start = ifelse(strand == "+", start-1-upstream, start-1-downstream),
-           end = ifelse(strand == "+", end+downstream, end+upstream)) %>%
+    if (!(key %in% names(annotation))) {
+      message("Column ", key, " not found — skipping filter.")
+      next
+    }
 
-    # if score not found, fill with dot in .bed annotation
-    dplyr::mutate(score = ifelse(is.na(score), ".", score)) %>%
+    annotation <- annotation[get(key) %in% val]
+  }
 
-    # remove regions where coordinates go over the edge
-    dplyr::filter({
-      negative_detected <- start < 0 | end < 0
-      if (any(negative_detected, na.rm = TRUE)) {
-        message(paste("Negative coordinates filtered out!", sum(negative_detected), "rows eliminated"))
-      }
-      !negative_detected
-    }) %>%
-    dplyr::select(seqnames, start, end, gene_id, score, strand)
+  # Adjust start and end based on position
+  if (!is.null(position) && position == "end") {
+    annotation[, start := end]
+  } else if (!is.null(position) && position == "start") {
+    annotation[, end := start]
+  }
+
+  # Apply upstream/downstream logic
+  annotation[, `:=`(
+    start = ifelse(strand == "+", start - 1 - upstream, start - 1 - downstream),
+    end   = ifelse(strand == "+", end + downstream, end + upstream)
+  )]
+
+  # if score not found, fill with dot in .bed annotation
+  annotation[, score := as.character(score)]
+  annotation[is.na(score), score := "."]
+
+  # Remove regions where coordinates go over the edge with a messaage
+  negative_detected <- annotation[, start < 0 | end < 0]
+  if (any(negative_detected, na.rm = TRUE)) {
+    message(paste("Negative coordinates filtered out!", sum(negative_detected, na.rm = TRUE), "rows eliminated"))
+  }
+  annotation <- annotation[!negative_detected]
+
+  annotation <- annotation[, .(seqnames, start, end, gene_id, score, strand)]
+
 
   # row number for tracking changes and logging
   nrow_start <- nrow(input_file)
@@ -115,41 +135,34 @@ make_windows <- function(input_file, upstream, downstream,
 
 # HELPERS
 
-# handle filter operations
-using_if_given <- function(df, column_name, value) {
-  # df:           the data frame
-  # column_name:  the name of the column as a string (e.g., "biotype")
-  # value:        the value to filter on (e.g., "protein_coding")
-  #               can be a vector!
+filter_by_gtf <- function(dt, list_of_args) {
+  stopifnot(is.data.table(dt))
 
-  # Ignore 1: If value not provided
-  if (any(is.null(value)) || any(is.na(value))) {
-    cat("Argument not given:", deparse(substitute(value)), # backtracking for variable name
-        "- continuing without filter.\n")
-    return(TRUE)
+
+  dt <- as.data.table(dt)
+
+  for (key in names(list_of_args)) {
+    val <- list_of_args[[key]]
+
+    # Ignore 1: If value not provided
+    if (is.null(val) || all(is.na(val))) {
+      message("Argument not given for ", key, " — skipping filter.")
+      next
+    }
+
+    # Ignore 2: If col does not exist
+    if (!(key %in% colnames(dt))) {
+      message("Column ", key, " not found in data — skipping filter.")
+      next
+    }
+
+    # Success: Perform filter
+    dt <- dt[get(key) %in% val]
   }
 
-  # Ignore 2: If col does not exist
-  if (!(column_name %in% colnames(df))) {
-    cat("The input data does not have column:", column_name,
-        "- continuing without filter.\n")
-    return(TRUE)
-  }
-
-  # Success: Perform filter
-  return(df[[column_name]] %in% value)
+  return(dt)
 }
 
-# filter by given list of columns
-filter_by_gtf <- function(df, list_of_args) {
-  purrr::reduce(names(list_of_args),           # iterates arguments
-                .init = df,                    # start state
-                .f = function(data, key) {
-                                # for safe filtering and messages
-                  dplyr::filter(data, using_if_given(data,
-                                               key,
-                                               list_of_args[[key]]))
-                })
-}
+
 
 

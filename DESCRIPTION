@@ -15,5 +15,6 @@ Imports:
     dplyr,
     readr,
     magrittr,
-    purrr
+    purrr,
+    data.table
 Config/testthat/edition: 3

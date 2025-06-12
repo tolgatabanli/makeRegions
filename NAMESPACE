@@ -2,3 +2,4 @@
 
 export(make_windows)
 importFrom(magrittr,"%>%")
+import(data.table)
