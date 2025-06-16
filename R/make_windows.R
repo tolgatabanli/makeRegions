@@ -151,8 +151,6 @@ filter_by_gtf <- function(dt, list_of_args) {
   stopifnot(is.data.table(dt))
 
 
-  dt <- as.data.table(dt)
-
   for (key in names(list_of_args)) {
     val <- list_of_args[[key]]
 
