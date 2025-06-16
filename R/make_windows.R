@@ -84,7 +84,6 @@ make_windows <- function(input_file, upstream, downstream,
       message("Column ", key, " not found — skipping filter.")
       next
     }
-
     annotation <- annotation[get(key) %in% val]
   }
 
@@ -97,8 +96,8 @@ make_windows <- function(input_file, upstream, downstream,
 
   # Apply upstream/downstream logic
   annotation[, `:=`(
-    start = ifelse(strand == "+", start - 1 - upstream, start - 1 - downstream),
-    end   = ifelse(strand == "+", end + downstream, end + upstream)
+    start = fifelse(strand == "+", start - 1 - upstream, start - 1 - downstream),
+    end   = fifelse(strand == "+", end + downstream, end + upstream)
   )]
 
   # if score not found, fill with dot in .bed annotation
