@@ -104,14 +104,26 @@ make_windows <- function(input_file, upstream, downstream,
   annotation[, score := as.character(score)]
   annotation[is.na(score), score := "."]
 
-  # Remove regions where coordinates go over the edge with a messaage
+  # Remove regions where coordinates go over the edge with a message
   negative_detected <- annotation[, start < 0 | end < 0]
   if (any(negative_detected, na.rm = TRUE)) {
     message(paste("Negative coordinates filtered out!", sum(negative_detected, na.rm = TRUE), "rows eliminated"))
   }
+
   annotation <- annotation[!negative_detected]
 
-  annotation <- annotation[, .(seqnames, start, end, gene_id, score, strand)]
+  # Create name column based on identifiers if GTF is given
+  if (is_gtf) {
+    annotation[, name := NA_character_]
+    annotation[type == "gene",       name := gene_id]
+    annotation[type == "transcript", name := paste(gene_id, transcript_id, sep = "-")]
+    annotation[type == "exon",       name := paste(gene_id, transcript_id, exon_number, sep = "-")]
+
+    annotation <- annotation[, .(seqnames, start, end, name, score, strand)]
+  } else {
+    annotation <- annotation[, .(seqnames, start, end, name = gene_id, score, strand)]
+  }
+
 
 
   # row number for tracking changes and logging
