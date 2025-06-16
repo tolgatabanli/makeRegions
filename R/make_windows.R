@@ -57,8 +57,6 @@ make_windows <- function(input_file, upstream, downstream,
     stop("Position argument should be either 'start' or 'end' !")
   }
 
-  # TODO: Check path_to_out validity
-
   # Create the directory path in out if they don't exist
   if (!is.null(path_to_output)) {
     dir_path <- dirname(path_to_output)
