@@ -2,7 +2,7 @@
 % Please edit documentation in R/make_windows.R
 \name{make_windows}
 \alias{make_windows}
-\title{Create genomic regions with upstream-downstream sizes and optional filters}
+\title{Create genomic regions with upstream-downstream sizes and optional filters.}
 \usage{
 make_windows(
   input_file,
@@ -23,19 +23,20 @@ make_windows(
 \item{path_to_output}{(Optional) File path to write output. Creates dirs if they do not exist}
 
 \item{position}{(Optional) Specify 'start' or 'end' to build the window around.
-If not specified, the start and end coordinates are extended with upstream and downstream sizes in corresponding way.}
+If not specified, the start and end coordinates are extended with upstream and downstream sizes, correspondingly}
 
-\item{...}{(Optional) Arguments to filter. For example, type (gene, transcript)
-gene_biotype (lncRNA, pseudogene)...
-If for any column a vector of length 2 or more is given, the regions will be generated
-that satisfy ANY one of the elements.}
+\item{...}{(Optional) GTF arguments to filter. Only if GTF file is given.
+For example: type = c("gene", "transcript", "exon"...),
+gene_biotype = c("lncRNA", "pseudogene"...) etc.
+A filter argument with a vector of length 2 or more chooses rows that satisfy ANY one of the elements.}
 }
 \value{
 A data.frame in .bed format with specified window and filter criteria.
-The columns 'seqnames' and 'strand' are factors.
+Columns are "seqnames", "start", "end", "name", "score", "strand".
+'seqnames' and 'strand' are factors.
 }
 \description{
-Create genomic regions with upstream-downstream sizes and optional filters
+Create genomic regions with upstream-downstream sizes and optional filters.
 }
 \examples{
 example_file <- system.file("extdata", "data", "example.gtf", package = "makeRegions")
