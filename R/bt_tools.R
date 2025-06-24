@@ -1,4 +1,5 @@
 .bedtools_env <- new.env(parent = emptyenv())
+.bedtools_env$bedtools_path <- "bedtools" # default, used if in PATH
 
 #' bedtools: utilities for genomic regions
 #'
@@ -50,6 +51,9 @@ get_bedtools_path <- function() {
 #'   bt_genomecov("bamfile.bam", "output.bedgraph")
 #' }
 bt_genomecov <- function(input_bam, output_file = NULL) {
+  # Check input file type
+  stopifnot(!endsWith(input_bam, "bam"))
+
   bedtools <- get_bedtools_path()
   args <- c("genomecov", "-ibam", input_bam, "-bg")
 
