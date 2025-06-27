@@ -37,8 +37,50 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
   if (is.null(bins) && is.null(quantiles)) {
     stop("You must provide either `bins` or `quantiles`.")
   }
+  # 0: not stranded, 1: regular, -1: reverse stranded
+  if (!(strand %in% c(-1, 0, 1))) {
+    stop(paste("Unrecognized argument for strand:", strand,
+               "\nShould be one of c(-1, 0, 1)"))
+  }
 
-  # save arguments in a named list
+  # Parse files
+  files <- list.files(input_dir)
+
+  # Take bedgraphs if other files exist
+  extension <- "bedgraph"
+  files <- grep(paste0("\\.", extension, "$"), files, value = T)
+
+  if (!is.null(grep_pattern)) {
+    files <- grep(grep_pattern, files, value = TRUE)
+  }
+
+  # If stranded, group files
+  pos <- neg <- bedgraph <- bedgraphPos <- bedgraphNeg <- NULL
+  if (strand != 0) {
+    if (strand == -1) {
+      pos <- "neg"
+      neg <- "pos"
+    } else if (strand == 1) {
+      pos <- "pos"
+      neg <- "neg"
+    }
+    bedgraphPos <- paste(file.path(input_dir, grep(pos, files, value = T)), collapse = ",")
+    bedgraphNeg <- paste(file.path(input_dir, grep(neg, files, value = T)), collapse = ",")
+  } else {
+    bedgraph <- files
+  }
+
+  # if cores not given, automatically detect
+  cores <- max(1, parallel::detectCores() - 2)
+
+  # Create the out directory if it doesn't exist
+  out_path <- dirname(output_dir)
+  if (out_path != "." && !dir.exists(out_path)) {
+    dir.create(out_path, recursive = TRUE)
+  }
+
+
+  # save arguments in a named list, NULL is okay
   opts <- list(
     "--annotation" = annotation,
     "--bedgraph" = bedgraph,
@@ -54,7 +96,7 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
     "--cores" = cores
     )
 
-  # flatten -> c("--flag", "val", ...)
+  # flatten -> c("--flag", "val", ...) and removes the NULL args
   args <- unlist(Map(
     function(flag, val) {
       if (!is.null(val)) c(flag, as.character(val)) else NULL
