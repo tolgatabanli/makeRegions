@@ -79,3 +79,20 @@ bin_genome <- function(annotation, bedgraph = NULL, bedgraphNeg = NULL, bedgraph
   )
 }
 
+
+
+# TODO: take input folder, optionally filter by pos/neg, or specific grep
+# TODO: take argument for reverse, unstranded, regular
+# TODO: log info on how many regions too small
+bin_genome.multiple(input_folder, strand = NULL, grep_pattern = NULL) {
+  # strand = c("none", "pos", "neg", "group")
+  files <- list.files(input_folder)
+
+  # Take bedgraphs
+  extension <- ".bedgraph"
+  files <- files[grepl(paste0("\\.", extension, "$"), files)]
+
+  if (!is.null(pattern)) {
+    files <- grep(pattern, files, value = TRUE)
+  }
+}
