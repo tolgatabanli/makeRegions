@@ -138,7 +138,7 @@ make_windows <- function(input_file, upstream, downstream,
   }
 
 
-  return(structure(list(result = as.data.frame(annotation),
+  return(structure(list(result = as.data.frame(annotation), # TODO: remove cast
                         params = params),
                    class = "GenomicRegion"))
 }
