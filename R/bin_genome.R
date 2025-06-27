@@ -25,36 +25,57 @@ set_binGenome_path <- function(path) {
 #' @export
 #'
 #' @examples
-create_bins <- function(bedgraph, bedgraphPos, bedgraphNeg, annotation,
-                        bins, quantiles, outputDir,
-                        bedgraphNames = NULL, annotationNames = NULL,
-                        cores = NULL, normalize) {
-  # TODO: take input folder, optionally filter by pos/neg, or specific grep
-  # TODO: take argument for reverse, unstranded, regular
-  # TODO: log info on how many regions too small
-  # TODO: use binGenome.sh
+bin_genome <- function(annotation, bedgraph = NULL, bedgraphNeg = NULL, bedgraphPos = NULL,
+                       outputDir,
+                       bins = NULL, quantiles = NULL,
+                       fixedBinSizeDownstream = NULL, fixedBinSizeUpstream = NULL,
+                       bedgraphNames = NULL, annotationNames = NULL,
+                       cores = NULL, normalize = FALSE) {
+  # exclusive arguments
+  if (!is.null(bedgraph) && (!is.null(bedgraphNeg) || !is.null(bedgraphPos))) {
+    stop("Use either `bedgraph` OR both `bedgraphNeg` and `bedgraphPos`, not both.")
+  }
+  if (is.null(bedgraph) && (is.null(bedgraphNeg) || is.null(bedgraphPos))) {
+    stop("You must provide either `bedgraph`, OR both `bedgraphNeg` and `bedgraphPos`.")
+  }
+  if (!is.null(bins) && !is.null(quantiles)) {
+    stop("Use either `bins` OR `quantiles`, not both.")
+  }
+  if (is.null(bins) && is.null(quantiles)) {
+    stop("You must provide either `bins` or `quantiles`.")
+  }
 
-  # Define input and output directories
-  inputdir <- "/path/to/input"
+  # save arguments in a named list
+  opts <- list(
+    "--annotation" = annotation,
+    "--bedgraph" = bedgraph,
+    "--bedgraphNeg" = bedgraphNeg,
+    "--bedgraphPos" = bedgraphPos,
+    "--outputDir" = outputDir,
+    "--bins" = bins,
+    "--quantiles" = quantiles,
+    "--fixedBinSizeDownstream" = fixedBinSizeDownstream,
+    "--fixedBinSizeUpstream" = fixedBinSizeUpstream,
+    "--bedgraphNames" = bedgraphNames,
+    "--annotationNames" = annotationNames,
+    "--cores" = cores
+    )
 
-  # Construct full command
-  res <- processx::run(
-    command = "binGenome.sh",
-    args = c(
-      "--bedgraphNeg",
-      paste(file.path(inputdir, "12AS_Ctl_1_pos.bedgraph"),
-            file.path(inputdir, "12AS_Ctl_2_pos.bedgraph"), sep = ","),
-      "--bedgraphPos",
-      paste(file.path(inputdir, "12AS_Ctl_1_neg.bedgraph"),
-            file.path(inputdir, "12AS_Ctl_2_neg.bedgraph"), sep = ","),
-      "--annotation", "anno_100Up_200Down.bed",
-      "--bins", "100",
-      "--fixedBinSizeDownstream", "40:50",
-      "--fixedBinSizeUpstream", "50:2",
-      "--outputDir", outputDir
-    ),
-    echo = TRUE  # optional: shows output live in console
+  # flatten -> c("--flag", "val", ...)
+  args <- unlist(Map(
+    function(flag, val) {
+      if (!is.null(val)) c(flag, as.character(val)) else NULL
+      }, names(opts), opts), use.names = FALSE)
+  # add normalize if given
+  if (normalize) {
+    args <- c("--normalize")
+  }
+
+  # Run process
+  processx::run(
+    command = .binGenome_env$binGenome_path,
+    args = args,
+    echo = TRUE
   )
-
 }
 
