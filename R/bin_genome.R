@@ -25,19 +25,12 @@ set_binGenome_path <- function(path) {
 #' @export
 #'
 #' @examples
-bin_genome <- function(annotation, bedgraph = NULL, bedgraphNeg = NULL, bedgraphPos = NULL,
-                       outputDir,
-                       bins = NULL, quantiles = NULL,
+bin_genome <- function(input_dir, strand, annotation, output_dir,
+                       bins = NULL, quantiles = NULL, grep_pattern = NULL,
                        fixedBinSizeDownstream = NULL, fixedBinSizeUpstream = NULL,
                        bedgraphNames = NULL, annotationNames = NULL,
                        cores = NULL, normalize = FALSE) {
-  # exclusive arguments
-  if (!is.null(bedgraph) && (!is.null(bedgraphNeg) || !is.null(bedgraphPos))) {
-    stop("Use either `bedgraph` OR both `bedgraphNeg` and `bedgraphPos`, not both.")
-  }
-  if (is.null(bedgraph) && (is.null(bedgraphNeg) || is.null(bedgraphPos))) {
-    stop("You must provide either `bedgraph`, OR both `bedgraphNeg` and `bedgraphPos`.")
-  }
+  # mutually exclusive parameters
   if (!is.null(bins) && !is.null(quantiles)) {
     stop("Use either `bins` OR `quantiles`, not both.")
   }
@@ -51,7 +44,7 @@ bin_genome <- function(annotation, bedgraph = NULL, bedgraphNeg = NULL, bedgraph
     "--bedgraph" = bedgraph,
     "--bedgraphNeg" = bedgraphNeg,
     "--bedgraphPos" = bedgraphPos,
-    "--outputDir" = outputDir,
+    "--outputDir" = output_dir,
     "--bins" = bins,
     "--quantiles" = quantiles,
     "--fixedBinSizeDownstream" = fixedBinSizeDownstream,
@@ -84,15 +77,4 @@ bin_genome <- function(annotation, bedgraph = NULL, bedgraphNeg = NULL, bedgraph
 # TODO: take input folder, optionally filter by pos/neg, or specific grep
 # TODO: take argument for reverse, unstranded, regular
 # TODO: log info on how many regions too small
-bin_genome.multiple(input_folder, strand = NULL, grep_pattern = NULL) {
-  # strand = c("none", "pos", "neg", "group")
-  files <- list.files(input_folder)
 
-  # Take bedgraphs
-  extension <- ".bedgraph"
-  files <- files[grepl(paste0("\\.", extension, "$"), files)]
-
-  if (!is.null(pattern)) {
-    files <- grep(pattern, files, value = TRUE)
-  }
-}
