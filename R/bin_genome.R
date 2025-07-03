@@ -129,12 +129,12 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
   )
 
   print("Too small regions found:")
-  print(too_small_warns_by_sample(console_output$stdout))
+  print(too_small_warns_by_sample(console_output$stdout), strand)
 }
 
 ### HELPERS ===============
 
-too_small_warns_by_sample <- function(console_output) {
+too_small_warns_by_sample <- function(console_output, strand) {
   sample <- NULL
   log_by_sample <- list() # list will be named with samples/files
   log_lines <- strsplit(console_output, split = "\n")[[1]]
@@ -156,5 +156,13 @@ too_small_warns_by_sample <- function(console_output) {
                                  function(lines) {
                                    sum(base::grepl("[WARN].*(too small)", lines))
                                    })
+
+  # if stranded merge neg and pos (one is actually always 0 but to be sure)
+  if (strand != 0) {
+    names(too_smalls_by_sample) <- gsub("(_pos|_neg)", "", names(too_smalls_by_sample))
+    too_smalls_by_sample <- tapply(too_smalls_by_sample,
+                                   names(too_smalls_by_sample),
+                                   sum)
+  }
   return(too_smalls_by_sample)
 }
