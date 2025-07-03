@@ -19,9 +19,13 @@ set_binGenome_path <- function(path) {
 #'
 #' @description
 #' Runs the binGenome.sh on the given file(s).
+#' Prints the log of how many regions were too small for binning in each sample.
+#' If stranded, pos and neg are merged and stripped from the name.
 #'
 #' @param input_dir Path to the folder containing bedgraph files.
-#' @param strand Filters files according to their strandedness. Currently a grep operation on "pos"/"neg".
+#' Only the files with .bedgraph extension are considered.
+#' @param strand Filters files according to their strandedness.
+#' It applies grep and filters files having "pos"/"neg" anywhere in their names.
 #' @param annotation Annotation file (.bed)
 #' @param output_dir Output folder for binGenome.sh
 #' @param bins/quantiles bins or quantiles for binGenome
