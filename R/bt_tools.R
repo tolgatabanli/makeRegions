@@ -52,12 +52,18 @@ get_bedtools_path <- function() {
 #' }
 bt_genomecov <- function(input_bam, output_file = NULL) {
   # Check input file type
-  stopifnot(!endsWith(input_bam, "bam"))
+  stopifnot(endsWith(input_bam, ".bam"))
+  stopifnot()
 
   bedtools <- get_bedtools_path()
   args <- c("genomecov", "-ibam", input_bam, "-bg")
 
   if (!is.null(output_file)) {
+    dir <- dirname(output_file)
+    if (!dir.exists(dir)) {
+      dir.create(dir, recursive = TRUE)
+    }
+
     processx::run(bedtools, args, stdout = output_file)
     return(invisible(output_file))
   } else {
