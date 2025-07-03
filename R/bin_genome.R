@@ -123,11 +123,34 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
     args = args,
     echo = FALSE
   )
-  too_small <- strsplit(console_output$stdout, "\n")[[1]] %>%
-    base::grepl("[WARN].*(too small)", .) %>%
-    sum
-  print(paste("Too small regions found:", too_small))
 
+  print("Too small regions found:")
+  print(too_small_warns_by_sample(console_output$stdout))
 }
 
+### HELPERS ===============
 
+too_small_warns_by_sample <- function(console_output) {
+  sample <- NULL
+  log_by_sample <- list() # list will be named with samples/files
+  log_lines <- strsplit(console_output, split = "\n")[[1]]
+
+  for (line in log_lines) {
+    # Start of a new file
+    if (grepl("^\\[INFO\\] started with.*\\.bedgraph'", line)) {
+      # Extract filename from path
+      path_match <- regmatches(line, regexpr("'[^']+\\.bedgraph'", line))
+      sample <- gsub(".*\\/|\\.bedgraph'", "", path_match)  # strip path and extension
+      log_by_sample[[sample]] <- character()
+    } else if (!is.null(sample)) { # Group the logs under current filename
+      log_by_sample[[sample]] <- c(log_by_sample[[sample]], line)
+    }
+  }
+
+  # log_by_sample is a list of vectors of lines
+  too_smalls_by_sample <- sapply(log_by_sample,
+                                 function(lines) {
+                                   sum(base::grepl("[WARN].*(too small)", lines))
+                                   })
+  return(too_smalls_by_sample)
+}
