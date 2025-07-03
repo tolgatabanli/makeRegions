@@ -1,4 +1,4 @@
-utils::globalVariables(c("gtf", "bed", "name", "path_to_out", "start", "end", "strand", "seqnames", "score", "gene_id", "input", ":="))
+utils::globalVariables(c("gtf", "bed", "name", "path_to_out", "start", "end", "strand", "seqnames", "score", "input", ":="))
 
 #' Create genomic regions with upstream-downstream sizes and optional filters.
 #'
