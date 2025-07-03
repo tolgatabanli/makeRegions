@@ -20,16 +20,26 @@ set_binGenome_path <- function(path) {
 #' @description
 #' Runs the binGenome.sh on the given file(s).
 #'
+#' @param input_dir Path to the folder containing bedgraph files.
+#' @param strand Filters files according to their strandedness. Currently a grep operation on "pos"/"neg".
+#' @param annotation Annotation file (.bed)
+#' @param output_dir Output folder for binGenome.sh
+#' @param bins/quantiles bins or quantiles for binGenome
+#' @param grep_pattern [optional] Filter for a grep pattern in files.
+#' @param fixedBinSizeDownstream,fixedBinSizeUpstream [optional]
+#' @param bedgraphNames,annotationNames [optional]
+#' @param cores [optional] Number of threads to use. Defualt is max(1, parallel::detectCores() - 2)
+#' @param normalize [optional]
 #'
-#' @returns
+#'
 #' @export
-#'
-#' @examples
 bin_genome <- function(input_dir, strand, annotation, output_dir,
                        bins = NULL, quantiles = NULL, grep_pattern = NULL,
                        fixedBinSizeDownstream = NULL, fixedBinSizeUpstream = NULL,
                        bedgraphNames = NULL, annotationNames = NULL,
                        cores = NULL, normalize = FALSE) {
+  print(paste("Using programme:", .binGenome_env$binGenome_path))
+
   # mutually exclusive parameters
   if (!is.null(bins) && !is.null(quantiles)) {
     stop("Use either `bins` OR `quantiles`, not both.")
