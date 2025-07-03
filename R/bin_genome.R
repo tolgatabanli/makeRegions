@@ -26,7 +26,8 @@ set_binGenome_path <- function(path) {
 #' @param output_dir Output folder for binGenome.sh
 #' @param bins/quantiles bins or quantiles for binGenome
 #' @param grep_pattern [optional] Filter for a grep pattern in files.
-#' @param fixedBinSizeDownstream,fixedBinSizeUpstream [optional]
+#' @param fixedBinSizeDownstream,fixedBinSizeUpstream [optional] Specifies the parameters that will be
+#' used for binning the downstream or upstream regions, respectively. Format: "binsize:binnumber".
 #' @param bedgraphNames,annotationNames [optional]
 #' @param cores [optional] Number of threads to use. Defualt is max(1, parallel::detectCores() - 2)
 #' @param normalize [optional]
