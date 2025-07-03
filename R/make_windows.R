@@ -39,12 +39,11 @@ make_windows <- function(input_file, upstream, downstream,
   is_gtf <- FALSE # use for ID column creation
   if(endsWith(input_file, ".gtf")) {
     is_gtf <- TRUE
-    input_file <- rtracklayer::import(input_file) %>%
+    input_file <- rtracklayer::import(input_file) %>% # seqnames, start, end, width, strand, source, type, score, phase, gene_id ...
       as.data.frame()
   } else if (endsWith(input_file, ".bed")) {
-    input_file <- rtracklayer::import(input_file) %>%
-      as.data.frame() %>%
-      dplyr::rename(gene_id = name) # TODO: remove this
+    input_file <- rtracklayer::import(input_file) %>% # seqnames, start, end, width, strand, name, score
+      as.data.frame()
     if(length(gtf_filters) > 0) {
       stop("GTF filters cannot be used with input file of format BED.")
     }
