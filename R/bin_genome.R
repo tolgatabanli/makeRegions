@@ -1,7 +1,7 @@
 .binGenome_env <- new.env(parent = emptyenv())
 .binGenome_env$binGenome_path <- "binGenome.sh" # default, used if in the same dir
 
-#' @rdname binGenome
+#' @rdname bin_genome
 #' @section set_binGenome_path:
 #'
 #' @param path Path to the binGenome.sh executable.
@@ -117,16 +117,16 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
   }
 
   # Run process
-  processx::run(
+  console_output <- processx::run(
     command = .binGenome_env$binGenome_path,
     args = args,
-    echo = TRUE
+    echo = FALSE
   )
+  too_small <- strsplit(console_output$stdout, "\n")[[1]] %>%
+    base::grepl("[WARN].*(too small)", .) %>%
+    sum
+  print(paste("Too small regions found:", too_small))
+
 }
 
-
-
-# TODO: take input folder, optionally filter by pos/neg, or specific grep
-# TODO: take argument for reverse, unstranded, regular
-# TODO: log info on how many regions too small
 
