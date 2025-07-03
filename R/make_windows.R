@@ -119,9 +119,8 @@ make_windows <- function(input_file, upstream, downstream,
     annotation[type == "exon",       name := paste(gene_id, transcript_id, exon_number, sep = "-")]
 
     annotation <- annotation[, .(seqnames, start, end, name, score, strand)]
-  } else {
-    annotation <- annotation[, .(seqnames, start, end, name = gene_id, score, strand)]
   }
+  annotation <- annotation[, .(seqnames, start, end, name, score, strand)]
 
 
 
