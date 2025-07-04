@@ -33,7 +33,7 @@ set_binGenome_path <- function(path) {
 #' @param fixedBinSizeDownstream,fixedBinSizeUpstream [optional] Specifies the parameters that will be
 #' used for binning the downstream or upstream regions, respectively. Format: "binsize:binnumber".
 #' @param bedgraphNames,annotationNames [optional]
-#' @param cores [optional] Number of threads to use. Defualt is max(1, parallel::detectCores() - 2)
+#' @param cores [optional] Number of threads to use. Defualt: max(1, parallel::detectCores() - 2)
 #' @param normalize [optional]
 #'
 #'
