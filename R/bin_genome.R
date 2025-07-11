@@ -129,7 +129,7 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
   )
 
   print("Too small regions found:")
-  print(too_small_warns_by_sample(console_output$stdout), strand)
+  print(too_small_warns_by_sample(console_output$stdout, strand))
 }
 
 ### HELPERS ===============
