@@ -4,26 +4,35 @@
 \alias{bt_genomecov}
 \title{Get the genome coverage using bedtools}
 \usage{
-bt_genomecov(input_bam, output_file = NULL)
+bt_genomecov(input_bam, output_file = NULL, stranded = FALSE)
 }
 \arguments{
-\item{output_file}{Optional path to output file.}
+\item{output_file}{\link{optional} path to output file.
+The extension in the given name will be stripped.
+If stranded = TRUE, then two output files with "_pos" and "_neg" appended
+will be created.}
+
+\item{stranded}{logical. Should output be split into strand-specific two files?
+Uses -strand argument of genomecov.
+Default is FALSE.}
 
 \item{input_bed}{Path to input BED file.}
 
 \item{genome_file}{Path to genome file.}
 }
 \value{
-If output file path given, a string of its path is returned,
-otherwise a data table of the result captured from the command is returned.
+If output file given, its path or a vector of paths (if stranded) is returned.
+Otherwise, a data table of the result captured from the command, or
+if stranded, a list of two data tables: (+,-).
 }
 \description{
-Handles following command: bedtools genomecov -ibam input_file -bg > output_file.
-Used for its side effect, creating coverage file.
+Handles the following command:
+bedtools genomecov -ibam input_file -bg (-strand strand) > output_file.
+Creates or returns coverage file.
 }
 \examples{
 \dontrun{
   set_bedtools_path("/usr/bin/bedtools")
-  bt_genomecov("bamfile.bam", "output.bedgraph")
+  bt_genomecov("bamfile.bam", "output.bedgraph", stranded = TRUE)
 }
 }

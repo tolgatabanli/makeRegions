@@ -26,9 +26,11 @@ bin_genome(
 \arguments{
 \item{path}{Path to the binGenome.sh executable.}
 
-\item{input_dir}{Path to the folder containing bedgraph files.}
+\item{input_dir}{Path to the folder containing bedgraph files.
+Only the files with .bedgraph extension are considered.}
 
-\item{strand}{Filters files according to their strandedness. Currently a grep operation on "pos"/"neg".}
+\item{strand}{Filters files according to their strandedness.
+It applies grep and filters files having "pos"/"neg" anywhere in their names.}
 
 \item{annotation}{Annotation file (.bed)}
 
@@ -36,11 +38,12 @@ bin_genome(
 
 \item{grep_pattern}{\link{optional} Filter for a grep pattern in files.}
 
-\item{fixedBinSizeDownstream, fixedBinSizeUpstream}{\link{optional}}
+\item{fixedBinSizeDownstream, fixedBinSizeUpstream}{\link{optional} Specifies the parameters that will be
+used for binning the downstream or upstream regions, respectively. Format: "binsize:binnumber".}
 
 \item{bedgraphNames, annotationNames}{\link{optional}}
 
-\item{cores}{\link{optional} Number of threads to use. Defualt is max(1, parallel::detectCores() - 2)}
+\item{cores}{\link{optional} Number of threads to use. Defualt: max(1, parallel::detectCores() - 2)}
 
 \item{normalize}{\link{optional}}
 
@@ -51,6 +54,8 @@ TRUE on successful execution, FALSE otherwise.
 }
 \description{
 Runs the binGenome.sh on the given file(s).
+Prints the log of how many regions were too small for binning in each sample.
+If stranded, pos and neg are merged and stripped from the name.
 }
 \section{set_binGenome_path}{
 
