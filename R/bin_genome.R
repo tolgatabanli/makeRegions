@@ -59,6 +59,18 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
                "\nShould be one of c(-1, 0, 1)"))
   }
 
+  # if cores not given, automatically detect
+  cores <- max(1, parallel::detectCores() - 2)
+
+  params <- as.list(environment())
+
+  # ================ Config and Logs  ================
+  write_config("bin_genome", params)
+  revert_sink <- start_log("bin_genome", params) # starts the log and returns a function to revert the sink on exit
+  if(is.null(revert_sink)) stop("REVERT NULL")
+  if (!is.null(revert_sink)) on.exit(revert_sink(), add = T)
+  # ================================
+
   # Parse files
   files <- list.files(input_dir)
 
@@ -86,8 +98,6 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
     bedgraph <- files
   }
 
-  # if cores not given, automatically detect
-  cores <- max(1, parallel::detectCores() - 2)
 
   # Create the out directory if it doesn't exist
   out_path <- dirname(output_dir)
