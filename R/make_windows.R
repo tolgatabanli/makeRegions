@@ -28,6 +28,7 @@ utils::globalVariables(c("gtf", "bed", "name", "path_to_out", "start", "end", "s
 make_windows <- function(input_file, upstream, downstream,
                          path_to_output = NULL, position = NULL,
                          ...) {
+  params <- as.list(environment())
   score <- NA
   gtf_filters <- list(...)
 
@@ -64,11 +65,15 @@ make_windows <- function(input_file, upstream, downstream,
     }
   }
 
-  # Save parameters
-  params <- as.list(environment())
+  # ================ Config and Logs  ================
+  write_config("make_windows", params)
+  revert_sink <- start_log("make_windows", params) # starts the log and returns a function to revert the sink on exit
+  if (!is.null(revert_sink)) on.exit(revert_sink(), add = T)
+
 
   #  ========================== Creating BED ==========================
-  annotation <- data.table::as.data.table(input_file)
+
+  annotation <- data.table::as.data.table(imported_file)
 
   # filter by gtf arguments (feature and 9th column of gtf)
   for (key in names(gtf_filters)) {
@@ -125,9 +130,9 @@ make_windows <- function(input_file, upstream, downstream,
 
 
   # row number for tracking changes and logging
-  message(paste("Input had", nrow(input_file),
-                "rows, output has", nrow(annotation), "rows.",
-                "Output has", data.table::uniqueN(annotation), "unique rows."))
+  message(paste0("Input had ", nrow(imported_file),
+                " rows, output has ", nrow(annotation), " rows (",
+                data.table::uniqueN(annotation), " unique)."))
 
   if(!is.null(path_to_output)) {
     annotation %>%
@@ -135,8 +140,7 @@ make_windows <- function(input_file, upstream, downstream,
     message(paste("File has been written:", path_to_output))
   }
 
-
-  return(structure(list(result = as.data.frame(annotation), # TODO: remove cast
+  invisible(structure(list(result = annotation,
                         params = params),
                    class = "GenomicRegion"))
 }
