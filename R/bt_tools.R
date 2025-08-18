@@ -62,6 +62,15 @@ get_bedtools_path <- function() {
 bt_genomecov <- function(input_bam, output_file = NULL, stranded = FALSE) {
   # Check input file type
   stopifnot(endsWith(input_bam, ".bam"))
+
+  params <- as.list(environment())
+
+  # ================ Config and Logs  ================
+  write_config("make_windows", params)
+  revert_sink <- start_log("bt_genomecov", params) # starts the log and returns a function to revert the sink on exit
+  if (!is.null(revert_sink)) on.exit(revert_sink(), add = T)
+  # ================================
+
   # 0: not stranded, 1: regular, -1: reverse stranded
 
   # stranded = FALSE: not stranded
