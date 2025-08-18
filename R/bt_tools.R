@@ -92,13 +92,13 @@ bt_genomecov <- function(input_bam, output_file = NULL, stranded = FALSE) {
       for (s in names(strand_map)) {
         args <- c(base_args, "-strand", strand_map[[s]])
         file <- paste0(output_file, "_", s, ".bedgraph")
-        processx::run(bedtools, args, stdout = file)
+        processx::run(bedtools, args, stdout = file, echo_cmd = T)
       }
     }
 
     # if not stranded do one call
     else {
-      processx::run(bedtools, base_args, stdout = paste0(output_file, ".bedgraph"))
+      processx::run(bedtools, base_args, stdout = paste0(output_file, ".bedgraph"), echo_cmd = T)
     }
 
     return(invisible(output_file))
