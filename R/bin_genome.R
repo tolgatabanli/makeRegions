@@ -122,25 +122,29 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
     "--cores" = cores
     )
 
-  # flatten -> c("--flag", "val", ...) and removes the NULL args
+  # flatten -> c("--flag", "val", ...) and remove the NULL args
   args <- unlist(Map(
     function(flag, val) {
       if (!is.null(val)) c(flag, as.character(val)) else NULL
       }, names(opts), opts), use.names = FALSE)
   # add normalize if given
   if (normalize) {
-    args <- c("--normalize")
+    args <- c(args, "--normalize")
   }
 
   # Run process
   console_output <- processx::run(
     command = .binGenome_env$binGenome_path,
     args = args,
-    echo = FALSE
+    echo = FALSE,
+    echo_cmd = TRUE
   )
 
-  print("Too small regions found:")
-  print(too_small_warns_by_sample(console_output$stdout, strand))
+  message("Too small regions found:")
+  warns <- too_small_warns_by_sample(console_output$stdout, strand)
+  for (sample in names(warns)) {
+    message(sprintf("  %s: %d", sample, warns[[sample]]))
+  }
 }
 
 ### HELPERS ===============
