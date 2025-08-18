@@ -43,7 +43,8 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
                        fixedBinSizeDownstream = NULL, fixedBinSizeUpstream = NULL,
                        bedgraphNames = NULL, annotationNames = NULL,
                        cores = NULL, normalize = FALSE) {
-  print(paste("Using programme:", .binGenome_env$binGenome_path))
+  message(paste("Using programme:", .binGenome_env$binGenome_path))
+
 
   # mutually exclusive parameters
   if (!is.null(bins) && !is.null(quantiles)) {
