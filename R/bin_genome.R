@@ -1,8 +1,10 @@
 .binGenome_env <- new.env(parent = emptyenv())
 .binGenome_env$binGenome_path <- "binGenome.sh" # default, used if in the same dir
 
+#' Wrapper for binGenome module
+#'
 #' @rdname bin_genome
-#' @section set_binGenome_path:
+#' @name bin_genome
 #'
 #' @param path Path to the binGenome.sh executable.
 #'
@@ -14,9 +16,7 @@ set_binGenome_path <- function(path) {
   invisible(TRUE)
 }
 
-
-#' Wrapper for binGenome module
-#'
+#' @rdname bin_genome
 #' @description
 #' Runs the binGenome.sh on the given file(s).
 #' Prints the log of how many regions were too small for binning in each sample.
