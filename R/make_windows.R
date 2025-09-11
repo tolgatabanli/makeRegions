@@ -2,7 +2,7 @@ utils::globalVariables(c("gtf", "bed", "name", "path_to_out", "start", "end", "s
 
 #' Create genomic regions with upstream-downstream sizes and optional filters.
 #'
-#' @param input_file GTF or BED file
+#' @param input_file GTF/GFF or BED file
 #' @param upstream Upstream size
 #' @param downstream Downstream size
 #' @param path_to_output (Optional) File path to write output. Creates dirs if they do not exist
@@ -38,7 +38,7 @@ make_windows <- function(input_file, upstream, downstream,
   }
 
   is_gtf <- FALSE # use for ID column creation
-  if(endsWith(input_file, ".gtf")) {
+  if(endsWith(input_file, ".gtf") | endsWith(input_file, ".gff")) {
     is_gtf <- TRUE
     imported_file <- rtracklayer::import(input_file) %>% # seqnames, start, end, width, strand, source, type, score, phase, gene_id ...
       as.data.frame()
@@ -49,7 +49,7 @@ make_windows <- function(input_file, upstream, downstream,
       stop("GTF filters cannot be used with input file of format BED.")
     }
   } else {
-    stop(paste0("Provided input file (", input_file, ") is of wrong format. Should: .gtf or .bed"))
+    stop(paste0("Provided input file (", input_file, ") is of wrong format. Should: .gtf, .gff or .bed"))
   }
 
   # optional argument check
@@ -119,8 +119,9 @@ make_windows <- function(input_file, upstream, downstream,
   # Create name column based on identifiers if GTF is given
   if (is_gtf) {
     annotation[, name := NA_character_]
-    annotation[type == "gene",       name := gene_id]
+    annotation[type == "gene" | type == "aggregate_gene", name := gene_id]
     annotation[type == "transcript", name := paste(gene_id, transcript_id, sep = "-")]
+    annotation[type == "exonic_part", name := paste(gene_id, exonic_part_number, sep = "-")]
     annotation[type == "exon",       name := paste(gene_id, transcript_id, exon_number, sep = "-")]
 
     annotation <- annotation[, .(seqnames, start, end, name, score, strand)]
