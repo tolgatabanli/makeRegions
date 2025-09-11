@@ -24,12 +24,17 @@ set_binGenome_path <- function(path) {
 #'
 #' @param input_dir Path to the folder containing bedgraph files.
 #' Only the files with .bedgraph extension are considered.
-#' @param strand Filters files according to their strandedness.
+#' @param strand Filters annotation files according to their strandedness.
 #' It applies grep and filters files having "pos"/"neg" anywhere in their names.
 #' @param annotation Annotation file (.bed)
 #' @param output_dir Output folder for binGenome.sh
+#' @param strand_pattern Identifiers for positive and negative strand to look in the names
+#' of annotation files, separated by '/', first corresponding to positive
+#' and second to negative. Default is "pos/neg".
+#' The pattern is used literally, so user should not escape regex metacharacters.
+#' For example, by strand_pattern = "+/-", plus is matched literally without any problem.
 #' @param bins/quantiles bins or quantiles for binGenome
-#' @param grep_pattern [optional] Filter for a grep pattern in files.
+#' @param grep_pattern [optional] Filter for a grep pattern in files. perl is TRUE.
 #' @param fixedBinSizeDownstream,fixedBinSizeUpstream [optional] Specifies the parameters that will be
 #' used for binning the downstream or upstream regions, respectively. Format: "binsize:binnumber".
 #' @param bedgraphNames,annotationNames [optional]
@@ -39,10 +44,11 @@ set_binGenome_path <- function(path) {
 #'
 #' @export
 bin_genome <- function(input_dir, strand, annotation, output_dir,
+                       strand_pattern = "pos/neg",
                        bins = NULL, quantiles = NULL, grep_pattern = NULL,
                        fixedBinSizeDownstream = NULL, fixedBinSizeUpstream = NULL,
                        bedgraphNames = NULL, annotationNames = NULL,
-                       cores = NULL, normalize = FALSE) {
+                       cores = NULL, normalize = FALSE, tmpDir = NULL) {
   message(paste("Using programme:", .binGenome_env$binGenome_path))
 
 
@@ -58,10 +64,15 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
     stop(paste("Unrecognized argument for strand:", strand,
                "\nShould be one of c(-1, 0, 1)"))
   }
+  if (!grepl("^[^/]+/[^/]+$", strand_pattern)) {
+    stop(paste("Wrong format for strand_pattern argument: ", strand_pattern,
+               "\nShould be two words separated by exactly one '/'."))
+  }
 
   # if cores not given, automatically detect
-  cores <- max(1, parallel::detectCores() - 2)
-
+  if (is.null(cores)) {
+    cores <- max(1, parallel::detectCores() - 2)
+  }
   params <- as.list(environment())
 
   # ================ Config and Logs  ================
@@ -79,30 +90,30 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
   files <- grep(paste0("\\.", extension, "$"), files, value = T)
 
   if (!is.null(grep_pattern)) {
-    files <- grep(grep_pattern, files, value = TRUE)
+    files <- grep(grep_pattern, files, perl = TRUE, value = TRUE)
   }
 
   # If stranded, group files
   pos <- neg <- bedgraph <- bedgraphPos <- bedgraphNeg <- NULL
+  strand_words <- strsplit(strand_pattern, "/", fixed = TRUE)[[1]]
   if (strand != 0) {
     if (strand == -1) {
-      pos <- "neg"
-      neg <- "pos"
+      pos <- strand_words[2]
+      neg <- strand_words[1]
     } else if (strand == 1) {
-      pos <- "pos"
-      neg <- "neg"
+      pos <- strand_words[1]
+      neg <- strand_words[2]
     }
-    bedgraphPos <- paste(file.path(input_dir, grep(pos, files, value = T)), collapse = ",")
-    bedgraphNeg <- paste(file.path(input_dir, grep(neg, files, value = T)), collapse = ",")
+    bedgraphPos <- paste(file.path(input_dir, grep(pos, files, value = T, fixed = T)), collapse = ",")
+    bedgraphNeg <- paste(file.path(input_dir, grep(neg, files, value = T, fixed = T)), collapse = ",")
   } else {
     bedgraph <- files
   }
 
 
   # Create the out directory if it doesn't exist
-  out_path <- dirname(output_dir)
-  if (out_path != "." && !dir.exists(out_path)) {
-    dir.create(out_path, recursive = TRUE)
+  if (output_dir != "." && !dir.exists(output_dir)) {
+    dir.create(output_dir, recursive = TRUE)
   }
 
 
@@ -119,7 +130,8 @@ bin_genome <- function(input_dir, strand, annotation, output_dir,
     "--fixedBinSizeUpstream" = fixedBinSizeUpstream,
     "--bedgraphNames" = bedgraphNames,
     "--annotationNames" = annotationNames,
-    "--cores" = cores
+    "--cores" = cores,
+    "--tmpDir" = tmpDir
     )
 
   # flatten -> c("--flag", "val", ...) and remove the NULL args
