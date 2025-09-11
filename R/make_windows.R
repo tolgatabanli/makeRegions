@@ -141,9 +141,7 @@ make_windows <- function(input_file, upstream, downstream,
     message(paste("File has been written:", path_to_output))
   }
 
-  invisible(structure(list(result = annotation,
-                        params = params),
-                   class = "GenomicRegion"))
+  invisible(annotation)
 }
 
 
