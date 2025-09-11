@@ -14,7 +14,7 @@ make_windows(
 )
 }
 \arguments{
-\item{input_file}{GTF or BED file}
+\item{input_file}{GTF/GFF or BED file}
 
 \item{upstream}{Upstream size}
 
