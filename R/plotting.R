@@ -235,24 +235,28 @@ plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, conditi
 
     pairwise_comparison <- grouped[display_names]
 
-    draw_plot(
+    draw_metagene(
       plot_dir,
-      paste0(region, "_", paste0(gsub(" ", "_", display_names), collapse = "_vs_")),
+      paste0(annotation_name, "_", paste0(gsub(" ", "_", display_names), collapse = "_vs_")),
       pairwise_comparison,
       labels = bodyLabels,
       ylab = "Coverage",
       legendPos = "top",
       title = paste(display_names, collapse = " vs "),
-      palette = colors
+      palette = colors,
+      fixedLabelsStartTotalBins = fixedLabelsStartTotalBins,
+      fixedLabelsEndTotalBins = fixedLabelsEndTotalBins
     )
 
     return(paste(display_names, collapse = "_vs_"))
-  }, mc.cores = remaining_cores, mc.preschedule = TRUE, mc.cleanup = TRUE)
+  }, mc.cores = threads, mc.preschedule = TRUE, mc.cleanup = TRUE)
 
   # Plot all genes:
-  draw_plot(plot_dir, paste0("all_", region), grouped,
+  draw_metagene(plot_dir, paste0("all_", annotation_name), grouped,
             labels = bodyLabels,
             ylab = "Coverage",
             legendPos = "top",
-            palette = condition_mapper$color)
+            palette = condition_mapper$color,
+            fixedLabelsStartTotalBins = fixedLabelsStartTotalBins,
+            fixedLabelsEndTotalBins = fixedLabelsEndTotalBins)
 }
