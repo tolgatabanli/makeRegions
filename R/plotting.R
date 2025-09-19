@@ -59,52 +59,88 @@ draw_metagene <- function(plot_dir, file_name, binMatrixList, pvThresholdsVec = 
     minYA = 0
   )
 
-  # unite formal and dot arguments into list
+  # Unite formal and dot arguments into list
   dots <- list(...)
-  args <- c(mget(names(formals()), envir = environment()), dots)
-
-  pdf(paste0(plot_folder, "/metagene_", file_name, ".pdf"), width = 14, height = 7)
-
 
   # Keep the relevant arguments for wrapped plot function and warn for unused
-  required_args <- names(formals(plotGroup))
-  extra_args <- setdiff(names(args), required_args)
+  all_arguments <- names(formals(plotGroup))
+  extra_args <- setdiff(names(dots), all_arguments)
   if (length(extra_args) > 0) {
-    warning("Ignoring unused arguments passed to draw_plot: ", paste(extra_args, collapse = ", "))
+    warning("Ignoring unused arguments passed to draw_metagene: ", paste(extra_args, collapse = ", "))
   }
-  args <- args[names(args) %in% required_args]
+  dots <- dots[names(dots) %in% all_arguments]
 
+  # Update the defaults by the user's valid arguments
+  defaults[names(dots)] <- dots
+
+  # Final arguments the call wrapped function
+  final_args <- c(mget("binMatrixList", envir = environment()), defaults)
+
+  pdf(paste0(plot_dir, "/metagene_", file_name, ".pdf"), width = 14, height = 7)
 
   if (length(binMatrixList) == 2) { # Wilcox test if there are two conditions
-    args$performWilcoxTest <- TRUE
-    args$wilcoxTestPVTransformFUN <- function(x) defaultPvalueColorTransformer(x, pvThresholds = pvThresholdsVec)
+    final_args$performWilcoxTest <- TRUE
+    final_args$wilcoxTestPVTransformFUN <- function(x) defaultPvalueColorTransformer(x, pvThresholds = pvThresholdsVec)
   } else {
-    args$performWilcoxTest <- FALSE
+    final_args$performWilcoxTest <- FALSE
   }
 
-  do.call(plotGroup, args)
+  message("Calling plotGroup with ", paste(str(final_args), collapse = ", "))
+  do.call(plotGroup, final_args)
 
   dev.off()
 }
 
 
-# Plots pairwise and all comparisons
-#
-# @param plot_dir Folder to save the plots as .pdf
-# @param experiment_folder The folder where windows and binning took place (~ "igv/whole_gene" etc.)
-# @param condition_mapper A data frame with columns "grep_name", "color", "display_name"
-plot_experiment <- function(plot_dir, experiment_folder, region, condition_mapper, remaining_cores) {
+
+#' Pairwise and all
+#'
+#' Plots all pairwise comparisons and one with all conditions.
+#' Exploits multithreading from package parallel using mclapply on pairs generated.
+#' binMatrix objects in the coverage folder in run_dir are aggregated
+#' using aggregate_FUN (default: mean) and saved as rds objects in a directory
+#' called 'aggregated_binmatrices' as a cache for further calls of the same function
+#' with same run_dir, annotation and aggregate function.
+#'
+#' @param plot_dir Where to save PDF outputs of plotting
+#' @param experiment_dir The run folder where windows and binning took place.
+#' The folder should have a 'config.json' file where the parameters for make_windows (optional)
+#' and bin_genome (required) are given.
+#' @param annotation_name Indicates the annotation used for binning. Appends to the file name.
+#' @param condition_mapper A data frame with columns "grep_name", "color", "display_name"
+#' to match conditions with line colors and names to display in the legend.
+#' @param threads Number of threads to use in pairwise plotting.
+#' Usage makes sense if multiple pairs are plotted, e.g. nrow(condition_mapper) > 1,
+#' and cores are available, e.g. if detectCores() >= threads or
+#' upstream threading has not used them up. Since this utilizes mclapply from
+#' package parallel, this option should be used careful with nested parallelization.
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, condition_mapper,
+                            aggregate_FUN = mean, threads = 1) {
+  # Check arguments
+  if(!dir.exists(run_dir)) stop("Run dir does not exist")
+  if(!file.exists(file.path(run_dir, 'config.json'))) stop("Run dir does not have a config file.")
+  absent_columns_in_mapper <- setdiff(c("grep_name", "color", "display_name"), names(condition_mapper))
+  if(length(absent_columns_in_mapper) > 0)
+    stop("condition_mapper data frame does not have the columns: ", paste(absent_columns_in_mapper, collapse = ", "))
+  if(!dir.exists(plot_dir)) dir.create(plot_dir)
+
   # Rely on config to understand run structure
-  config <- jsonlite::read_json(file.path(experiment_folder, "config.json"), simplifyVector = TRUE)
+  config <- jsonlite::read_json(file.path(run_dir, "config.json"), simplifyVector = TRUE)
   cov_folder <- file.path(config$bin_genome$output_dir)
   condition_greps <- condition_mapper[["grep_name"]]
 
-  message(paste("Started processing", experiment_folder, "with region:", region))
+  message("Started processing ", run_dir, " with annotation:", annotation_name)
 
   # === label settings ===
   firstLabel <- "0%"
   endLabel   <- "100%"
 
+  # include 0 and 100 if plotting only gene body
   # upstream labels
   if ("upstream" %in% config$make_windows) {
     firstLabel   <- ""
