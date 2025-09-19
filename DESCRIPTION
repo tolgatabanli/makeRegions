@@ -16,5 +16,6 @@ Imports:
     readr,
     magrittr,
     purrr,
-    data.table
+    data.table,
+    parallel
 Config/testthat/edition: 3
