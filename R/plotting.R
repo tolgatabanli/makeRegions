@@ -167,25 +167,28 @@ plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, conditi
 
   # fixed bins
   fixedLabelsEndTotalBins <- ifelse(
-    is.na(config$bin_genome$fixedBinSizeDownstream),
+    length(config$bin_genome$fixedBinSizeDownstream) == 0,
     0L,
     as.integer(strsplit(as.character(config$bin_genome$fixedBinSizeDownstream), ":")[[1]][1])
   )
   fixedLabelsStartTotalBins <- ifelse(
-    is.na(config$bin_genome$fixedBinSizeUpstream),
+    length(config$bin_genome$fixedBinSizeDownstream) == 0,
     0L,
     as.integer(strsplit(as.character(config$bin_genome$fixedBinSizeUpstream), ":")[[1]][1])
   )
 
-  # Create pairs of comparisons
-  pairs <- combn(condition_greps, 2) # should iterate through cols for pairwise comparisons
+
+  # Create pairs
+  pairs <- combn(condition_greps, 2) # iterate through cols for pairwise comparisons
 
   # === binMatrix aggregation ===
   # Check if grouped binMatrices exist as Rds objects
   aggregated_matrices <- list()
   rds_dir <- "aggregated_binmatrices"
+  aggr_func <- deparse(substitute(aggregate_FUN))
   rds_object <- file.path(rds_dir,
-                          paste0(paste0(strsplit(experiment_folder, "/")[[1]], collapse = "_"), ".Rds")
+                          paste0(paste0(strsplit(run_dir, "/")[[1]], collapse = "_"),
+                                 ".Rds") #"_", _aggr_func,
   )
   if (!dir.exists(rds_dir) & !file.exists(rds_object)) {
     message("No RDS object found, reading and grouping and saving as RDS for next time!..")
