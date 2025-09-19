@@ -1,24 +1,45 @@
-#!/home/proj/software/R/R-4.2.2.mkl/bin/Rscript
+.makeRegions_plotting_env <- new.env(parent = emptyenv())
+.makeRegions_plotting_env$plotting_lib <- NULL
 
-source("../metagene/plotting_lib.R")
+source("../metagene/binGenome.lib.R")
 
-#' Wrapper for basic plot drawing from binGenome plotting library
+#' Wrapper for sourcing plotting_lib.R
 #'
-#' @param plot_folder Where to save PDF of the plot
+#' @rdname plotting
+#' @name plotting
+#'
+#' @param path Path to the plotting_lib.R
+#'
+#' @return TRUE on successful execution, FALSE otherwise.
+#' @export
+source_plotting_lib <- function(path) {
+  if (!file.exists(path)) stop("Invalid binGenome.sh path: ", path)
+  if (!endsWith(path, ".R")) stop("Invalid file. Should be an R script.")
+  .makeRegions_plotting_env$plotting_lib <- normalizePath(path)
+  source(path)
+  invisible(TRUE)
+}
+
+
+#' @rdname plotting
+#' @description
+#' Basic plot drawing function wrapped from binGenome plotting library
+#'
+#' @param plot_dir Where to save PDF of the plot
 #' @param file_name File identifier. "metagene_" gets added as prefix.
 #' @param binMatrixList List of binMatrix instances.
+#' @param pvThresholdsVec A vector of numeric between 0 and 1 to use
+#' as p-value thresholds in defaultPvalueColorTransformer for Wilcoxon test.
 #'
 #' @export
-#'
-#' @examples
-draw_plot <- function(plot_folder, file_name, binMatrixList ...) {
+draw_metagene <- function(plot_dir, file_name, binMatrixList, pvThresholdsVec = c(0.05, 10^-3, 10^-5), ...) {
+
   # Default arguments
   defaults <- list(
     palette = grDevices::rainbow(length(binMatrixList)),
     legendPos = "topleft",
     legendSpacingBetween = 20,
     title = "",
-    pvThresholdsVec = c(0.05, 10^-3, 10^-5),
     normBylibSize = FALSE,
     normByShapeSum = TRUE,
     normByBinlength = FALSE,
