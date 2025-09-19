@@ -208,17 +208,17 @@ plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, conditi
     # summarize each condition using median of reps
     grouped <- lapply(bin_tables, function(condition) {
       groupMatrices(condition, median)
-    }
+      }
     )
     dir.create(rds_dir)
     saveRDS(grouped, file = rds_object)
   } else {
-    message("Reading from the found RDS object!..")
+    message("Reading from the found RDS object: ", rds_object)
     grouped <- readRDS(rds_object)
   }
 
   # plot pairs
-  message(paste0("Future apply working with cores:", remaining_cores))
+  message("Pairwise plotting in threads: ", threads)
   mclapply(1:ncol(pairs), function(comparison_index) {
     this <- pairs[1, comparison_index]
     that <- pairs[2, comparison_index]
@@ -230,8 +230,8 @@ plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, conditi
     name_idx <- match(c(this, that), condition_mapper$grep_name)
     display_names <- condition_mapper$display_name[name_idx]
 
-    message(paste("Drawing plot for", paste(display_names, collapse = ", "),
-                  "with colors", paste(colors, collapse = ", "), "respectively."))
+    message("Drawing plot for ", paste(display_names, collapse = ", "),
+                  " with color(s) ", paste(colors, collapse = ", "), ".")
 
     pairwise_comparison <- grouped[display_names]
 
