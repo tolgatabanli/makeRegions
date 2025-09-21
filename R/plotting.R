@@ -260,3 +260,25 @@ plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, title =
             fixedLabelsStartTotalBins = fixedLabelsStartTotalBins,
             fixedLabelsEndTotalBins = fixedLabelsEndTotalBins)
 }
+
+
+
+# ===== HELPERS =====
+getBinTable <- function(folder, condition, gsub_name, genes = NULL, ignore = NULL){
+  rep_list <- list.files(path = folder,
+                         pattern = paste0(condition, ".*\\.coverage\\.csv"),
+                         full.names = T)
+  if(!is.null(ignore)) rep_list <- grep(ignore, rep_list, invert = T, value = T)
+  cov_list <- list.files(path = folder,
+                         pattern = paste0(condition, ".*.sum.csv"),
+                         full.names = T)
+  names <- gsub(gsub_name, "", basename(rep_list))
+  names(rep_list) <- names
+  names(cov_list) <- names
+  cond_list <- lapply(names, function(x) {
+    readBinTable(rep_list[[x]], cov_list[[x]])
+  }
+  )
+  names(cond_list) <- names
+  return(cond_list)
+}
