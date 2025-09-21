@@ -17,5 +17,6 @@ Imports:
     magrittr,
     purrr,
     data.table,
+    jsonlite,
     parallel
 Config/testthat/edition: 3
