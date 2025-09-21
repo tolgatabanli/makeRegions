@@ -84,7 +84,8 @@ draw_metagene <- function(plot_dir, file_name, binMatrixList, pvThresholdsVec = 
     final_args$performWilcoxTest <- FALSE
   }
 
-  message("Calling plotGroup with ", paste(str(final_args), collapse = ", "))
+  jsonlite::write_json(final_args[names(final_args) != "binMatrixList"],
+                       file.path(plot_dir, paste0(file_name, ".json")))
   do.call(plotGroup, final_args)
 
   dev.off()
