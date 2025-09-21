@@ -241,7 +241,7 @@ plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, title =
       labels = bodyLabels,
       ylab = "Coverage",
       legendPos = "top",
-      title = paste(display_names, collapse = " vs "),
+      title = title,
       palette = colors,
       fixedLabelsStartTotalBins = fixedLabelsStartTotalBins,
       fixedLabelsEndTotalBins = fixedLabelsEndTotalBins
@@ -254,6 +254,7 @@ plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, title =
   draw_metagene(plot_dir, paste0("all_", annotation_name), grouped,
             labels = bodyLabels,
             ylab = "Coverage",
+            title = "All Samples",
             legendPos = "top",
             palette = condition_mapper$color,
             fixedLabelsStartTotalBins = fixedLabelsStartTotalBins,
