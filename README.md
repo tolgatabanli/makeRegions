@@ -5,7 +5,7 @@
 <!-- badges: end -->
 
 The package “makeRegions” helps with
-- the creation of genomic regions from GTF or BED files with options to filter specific features.
+- the creation of genomic regions from GTF, GFF or BED files with options to filter specific features.
 - wrapper functions for bedtools
 - wrapper functions for an internal metagene plotting library
 
