@@ -107,6 +107,7 @@ draw_metagene <- function(plot_dir, file_name, binMatrixList, pvThresholdsVec = 
 #' The folder should have a 'config.json' file where the parameters for make_windows (optional)
 #' and bin_genome (required) are given.
 #' @param annotation_name Indicates the annotation used for binning. Appends to the file name.
+#' If a named vector, the name is used for the title!
 #' @param condition_mapper A data frame with columns "grep_name", "color", "display_name"
 #' to match conditions with line colors and names to display in the legend.
 #' @param threads Number of threads to use in pairwise plotting.
@@ -115,12 +116,9 @@ draw_metagene <- function(plot_dir, file_name, binMatrixList, pvThresholdsVec = 
 #' upstream threading has not used them up. Since this utilizes mclapply from
 #' package parallel, this option should be used careful with nested parallelization.
 #'
-#' @returns
 #' @export
-#'
-#' @examples
-plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, condition_mapper,
-                            aggregate_FUN = mean, threads = 1) {
+plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, title = annotation_name,
+                                     condition_mapper, aggregate_FUN = mean, threads = 1) {
   # Check arguments
   if(!dir.exists(run_dir)) stop("Run dir does not exist")
   if(!file.exists(file.path(run_dir, 'config.json'))) stop("Run dir does not have a config file.")
@@ -136,7 +134,7 @@ plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, conditi
 
   message("Started processing ", run_dir, " with annotation:", annotation_name)
 
-  # === label settings ===
+  # === title and label settings ===
   firstLabel <- "0%"
   endLabel   <- "100%"
 
