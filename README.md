@@ -4,13 +4,16 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The package “makeRegions” currently helps with the creation of genomic
-regions from GTF or BED files with options to filter specific features.
+The package “makeRegions” helps with
+- the creation of genomic regions from GTF or BED files with options to filter specific features.
+- wrapper functions for bedtools
+- wrapper functions for an internal metagene plotting library
+- 
 
 ## Installation
 
 You can install the development version of makeRegions from
-[GitHub](https://github.com/) with: (If cannot use any packages for installing from GitHub, see below)
+[GitHub](https://github.com/) with: (If you cannot use any packages for installing from GitHub, see below)
 
 ```r
 # install.packages("pak")
@@ -40,7 +43,7 @@ example_file <- system.file("extdata", "data", "example.gtf", package = "makeReg
 result <- make_windows(input_file=example_file,
                        upstream = 1000, downstream = 2000,
                        feature = "gene", biotype = "lncRNA",
-                       position = "start")$result
+                       position = "start")
 print(head(result))
 #>   seqnames   start     end         gene_id score strand
 #> 1     chr1 2580559 2583560 ENSG00000228037     .      +
