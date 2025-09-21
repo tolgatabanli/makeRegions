@@ -1,7 +1,5 @@
-.makeRegions_plotting_env <- new.env(parent = emptyenv())
+.makeRegions_plotting_env <- new.env(parent = globalenv())
 .makeRegions_plotting_env$plotting_lib <- NULL
-
-source("../metagene/binGenome.lib.R")
 
 #' Wrapper for sourcing plotting_lib.R
 #'
@@ -10,14 +8,15 @@ source("../metagene/binGenome.lib.R")
 #'
 #' @param path Path to the plotting_lib.R
 #'
-#' @return TRUE on successful execution, FALSE otherwise.
+#' @return Normalized path.
 #' @export
 source_plotting_lib <- function(path) {
-  if (!file.exists(path)) stop("Invalid binGenome.sh path: ", path)
+  if (!file.exists(path)) stop("File does not exist: ", path)
   if (!endsWith(path, ".R")) stop("Invalid file. Should be an R script.")
-  .makeRegions_plotting_env$plotting_lib <- normalizePath(path)
+  path <- normalizePath(path)
+  .makeRegions_plotting_env$plotting_lib <- path
   source(path)
-  invisible(TRUE)
+  return(path)
 }
 
 
