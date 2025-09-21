@@ -176,6 +176,7 @@ plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, title =
   )
 
 
+
   # Create pairs
   pairs <- combn(condition_greps, 2) # iterate through cols for pairwise comparisons
 
@@ -186,9 +187,9 @@ plot_metagene_experiment <- function(plot_dir, run_dir, annotation_name, title =
   aggr_func <- deparse(substitute(aggregate_FUN))
   rds_object <- file.path(rds_dir,
                           paste0(paste0(strsplit(run_dir, "/")[[1]], collapse = "_"),
-                                 ".Rds") #"_", _aggr_func,
+                                 "_", aggr_func, ".Rds")
   )
-  if (!dir.exists(rds_dir) & !file.exists(rds_object)) {
+  if (!dir.exists(rds_dir) || !file.exists(rds_object)) {
     message("No RDS object found, reading and grouping and saving as RDS for next time!..")
     # read bin tables from the coverage folder
     bin_tables <- list()
